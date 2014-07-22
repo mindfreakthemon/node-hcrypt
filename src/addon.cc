@@ -1,10 +1,10 @@
 #include <node.h>
-#include "myobject.h"
+#include "scarab_object.h"
 
 using namespace v8;
 
 void InitAll(Handle<Object> exports) {
-  MyObject::Init(exports);
+  Scarab::Init(exports);
 }
 
 NODE_MODULE(addon, InitAll)
