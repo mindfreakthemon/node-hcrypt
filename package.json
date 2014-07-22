@@ -1,0 +1,26 @@
+{
+  "name": "node-hcrypt",
+  "version": "0.0.1",
+  "description": "node-hcrypt ===========",
+  "main": "index.js",
+  "scripts": {
+    "install": "node-gyp rebuild"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mindfreakthemon/node-hcrypt.git"
+  },
+  "keywords": [
+    "hcrypt"
+  ],
+  "author": "",
+  "license": "MIT",
+  "gypfile": true,
+  "bugs": {
+    "url": "https://github.com/mindfreakthemon/node-hcrypt/issues"
+  },
+  "homepage": "https://github.com/mindfreakthemon/node-hcrypt",
+  "dependencies": {
+    "bigint": "^0.4.2"
+  }
+}
