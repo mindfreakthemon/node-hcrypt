@@ -30,6 +30,9 @@ void Crypto::Init(Handle<Object> exports) {
 	tpl->PrototypeTemplate()->Set(String::NewSymbol("decrypt"),
 		FunctionTemplate::New(Decrypt)->GetFunction());
 
+	tpl->PrototypeTemplate()->Set(String::NewSymbol("recrypt"),
+        FunctionTemplate::New(Recrypt)->GetFunction());
+
 	tpl->PrototypeTemplate()->Set(String::NewSymbol("export"),
 		FunctionTemplate::New(Export)->GetFunction());
 
@@ -114,36 +117,80 @@ Handle<Value> Crypto::Decrypt(const Arguments& args) {
 	return scope.Close(Number::New(m));
 }
 
+Handle<Value> Crypto::Recrypt(const Arguments& args) {
+	HandleScope scope;
+
+	if (args.Length() < 1) {
+		ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
+		return scope.Close(Undefined());
+	}
+
+	if (!args[0]->IsString()) {
+		ThrowException(Exception::TypeError(String::New("Argument must be a string")));
+		return scope.Close(Undefined());
+	}
+
+	String::Utf8Value str(args[0]->ToString());
+
+	Crypto* obj = ObjectWrap::Unwrap<Crypto>(args.This());
+
+	mpz_t c;
+	mpz_init(c);
+
+	mpz_set_str(c, *str, EXPORT_BASE);
+
+	fhe_recrypt(c, obj->pk);
+
+	char* s = mpz_get_str(NULL, EXPORT_BASE, c);
+
+	mpz_clear(c);
+
+	return scope.Close(String::New(s));
+}
+
 Handle<Value> Crypto::Encrypt(const Arguments& args) {
-  HandleScope scope;
+	HandleScope scope;
 
-  if (args.Length() < 1) {
-    ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
-    return scope.Close(Undefined());
-  }
+	if (args.Length() < 1) {
+		ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
+		return scope.Close(Undefined());
+	}
 
-  if (!args[0]->IsNumber()) {
-    ThrowException(Exception::TypeError(String::New("Argument must be number")));
-    return scope.Close(Undefined());
-  }
+	if (!args[0]->IsNumber()) {
+		ThrowException(Exception::TypeError(String::New("Argument must be number")));
+		return scope.Close(Undefined());
+	}
 
-  int m = args[0]->NumberValue();
+	int m = args[0]->NumberValue();
 
-  if ((m != 0) && (m != 1)) {
-    ThrowException(Exception::TypeError(String::New("Argument must be either 0 or 1")));
-    return scope.Close(Undefined());
-  }
+	if ((m != 0) && (m != 1)) {
+		ThrowException(Exception::TypeError(String::New("Argument must be either 0 or 1")));
+		return scope.Close(Undefined());
+	}
 
-  Crypto* obj = ObjectWrap::Unwrap<Crypto>(args.This());
+	Crypto* obj = ObjectWrap::Unwrap<Crypto>(args.This());
 
-  mpz_t c;
-  mpz_init(c);
+	mpz_t c;
+	mpz_init(c);
 
-  fhe_encrypt(c, obj->pk, m);
+	fhe_encrypt(c, obj->pk, m);
 
-  char* s = mpz_get_str(NULL, EXPORT_BASE, c);
+//	// HACK
+//	mpz_t c0;
+//	mpz_init(c0);
+//	fhe_encrypt(c0, obj->pk, 0);
+//
+//	srand(time(NULL));
+//	int i, r = rand() % 2;
+//
+//	for (i = 0; i < r; i++) {
+//		fhe_add(c, c, c0, obj->pk);
+//		fhe_recrypt(c, obj->pk);
+//	}
 
-  mpz_clear(c);
+	char* s = mpz_get_str(NULL, EXPORT_BASE, c);
 
-  return scope.Close(String::New(s));
+	mpz_clear(c);
+
+	return scope.Close(String::New(s));
 }

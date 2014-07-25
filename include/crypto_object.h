@@ -19,6 +19,7 @@ class Crypto : public node::ObjectWrap {
   static Handle<Value> New(const Arguments& args);
   static Handle<Value> Encrypt(const Arguments& args);
   static Handle<Value> Decrypt(const Arguments& args);
+  static Handle<Value> Recrypt(const Arguments& args);
   static Handle<Value> Export(const Arguments& args);
   static Persistent<Function> constructor;
 

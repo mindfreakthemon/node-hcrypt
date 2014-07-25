@@ -17,11 +17,10 @@ class Operator : public node::ObjectWrap {
   ~Operator();
 
   static Handle<Value> New(const Arguments& args);
-//  static Handle<Value> Recrypt(const Arguments& args);
   static Handle<Value> Add(const Arguments& args);
-//  static Handle<Value> HalfAdd(const Arguments& args);
-//  static Handle<Value> FullAdd(const Arguments& args);
-//  static Handle<Value> Mul(const Arguments& args);
+  static Handle<Value> HalfAdd(const Arguments& args);
+  static Handle<Value> FullAdd(const Arguments& args);
+  static Handle<Value> Mul(const Arguments& args);
   static Persistent<Function> constructor;
 
   fhe_pk_t pk;
