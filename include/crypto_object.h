@@ -1,30 +1,27 @@
 #ifndef CRYPTO_OBJECT_H
 #define CRYPTO_OBJECT_H
 
-#include <node.h>
-#include <gmp.h>
+#include <nan.h>
 #include "scarab.h"
 #include "defines.h"
 
-using namespace v8;
+class Crypto : public Nan::ObjectWrap {
+public:
+    static NAN_MODULE_INIT(Init);
 
-class Crypto : public node::ObjectWrap {
- public:
-  static void Init(Handle<Object> exports);
+private:
+    explicit Crypto();
+    ~Crypto();
 
- private:
-  explicit Crypto();
-  ~Crypto();
+    static NAN_METHOD(New);
+    static NAN_METHOD(Encrypt);
+    static NAN_METHOD(Decrypt);
+    static NAN_METHOD(Recrypt);
+    static NAN_METHOD(Export);
+    static Nan::Persistent<v8::Function> constructor;
 
-  static Handle<Value> New(const Arguments& args);
-  static Handle<Value> Encrypt(const Arguments& args);
-  static Handle<Value> Decrypt(const Arguments& args);
-  static Handle<Value> Recrypt(const Arguments& args);
-  static Handle<Value> Export(const Arguments& args);
-  static Persistent<Function> constructor;
-
-  fhe_pk_t pk;
-  fhe_sk_t sk;
+    fhe_pk_t pk;
+    fhe_sk_t sk;
 };
 
 #endif

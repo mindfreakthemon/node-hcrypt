@@ -1,12 +1,12 @@
-#include <node.h>
+#include <nan.h>
 #include "crypto_object.h"
 #include "operator_object.h"
 
-using namespace v8;
+using v8::FunctionTemplate;
 
-void InitAll(Handle<Object> exports) {
-  Crypto::Init(exports);
-  Operator::Init(exports);
+NAN_MODULE_INIT(InitAll) {
+  Crypto::Init(target);
+  Operator::Init(target);
 }
 
 NODE_MODULE(addon, InitAll)

@@ -1,9 +1,22 @@
 #include "crypto_object.h"
 
-using namespace v8;
 using namespace std;
 
-Persistent<Function> Crypto::constructor;
+Nan::Persistent<v8::Function> Crypto::constructor;
+
+NAN_MODULE_INIT(Crypto::Init) {
+  v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
+  tpl->SetClassName(Nan::New("Crypto").ToLocalChecked());
+  tpl->InstanceTemplate()->SetInternalFieldCount(2);
+
+  Nan::SetPrototypeMethod(tpl, "encrypt", Encrypt);
+  Nan::SetPrototypeMethod(tpl, "decrypt", Decrypt);
+  Nan::SetPrototypeMethod(tpl, "recrypt", Recrypt);
+  Nan::SetPrototypeMethod(tpl, "export", Export);
+
+  constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());
+  Nan::Set(target, Nan::New("Crypto").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
+}
 
 Crypto::Crypto() {
 	fhe_pk_init(pk);
@@ -16,94 +29,63 @@ Crypto::~Crypto() {
 	fhe_sk_clear(sk);
 }
 
-void Crypto::Init(Handle<Object> exports) {
-	// Prepare constructor template
-	Local<FunctionTemplate> tpl = FunctionTemplate::New(New);
-
-	tpl->SetClassName(String::NewSymbol("Crypto"));
-	tpl->InstanceTemplate()->SetInternalFieldCount(2);
-
-	// Prototype
-	tpl->PrototypeTemplate()->Set(String::NewSymbol("encrypt"),
-		FunctionTemplate::New(Encrypt)->GetFunction());
-
-	tpl->PrototypeTemplate()->Set(String::NewSymbol("decrypt"),
-		FunctionTemplate::New(Decrypt)->GetFunction());
-
-	tpl->PrototypeTemplate()->Set(String::NewSymbol("recrypt"),
-        FunctionTemplate::New(Recrypt)->GetFunction());
-
-	tpl->PrototypeTemplate()->Set(String::NewSymbol("export"),
-		FunctionTemplate::New(Export)->GetFunction());
-
-	constructor = Persistent<Function>::New(tpl->GetFunction());
-	exports->Set(String::NewSymbol("Crypto"), constructor);
+NAN_METHOD(Crypto::New) {
+    if (info.IsConstructCall()) {
+        Crypto *obj = new Crypto();
+        obj->Wrap(info.This());
+        info.GetReturnValue().Set(info.This());
+    } else {
+        v8::Local<v8::Function> cons = Nan::New(constructor);
+        info.GetReturnValue().Set(cons->NewInstance());
+    }
 }
 
-Handle<Value> Crypto::New(const Arguments& args) {
-	HandleScope scope;
-
-	if (args.IsConstructCall()) {
-		// Invoked as constructor: `new Crypto(...)`
-		Crypto* obj = new Crypto();
-		obj->Wrap(args.This());
-		return args.This();
-	} else {
-		// Invoked as plain function `Crypto(...)`, turn into construct call.
-		Local<Value> array = args.Data();
-		return scope.Close(constructor->NewInstance(args.Length(), &array));
-	}
-}
-
-Handle<Value> Crypto::Export(const Arguments& args) {
-	HandleScope scope;
-
+NAN_METHOD(Crypto::Export) {
 	char* s;
 	int i;
 
-	Crypto* obj = ObjectWrap::Unwrap<Crypto>(args.This());
+	Crypto* obj = Nan::ObjectWrap::Unwrap<Crypto>(info.This());
 
-	Local<Object> result = Object::New();
+    v8::Isolate* isolate = info.GetIsolate();
+	v8::Local<v8::Object> result = v8::Object::New(isolate);
 
-	Local<Array> B = Array::New(S1);
-	Local<Array> c = Array::New(S1);
+	v8::Local<v8::Array> B = v8::Array::New(isolate, S1);
+	v8::Local<v8::Array> c = v8::Array::New(isolate, S1);
 
 	s = mpz_get_str(NULL, EXPORT_BASE, obj->pk->p);
-	result->Set(String::New("p"), String::New(s));
+	result->Set(Nan::New("p").ToLocalChecked(), Nan::New(s).ToLocalChecked());
 
 	s = mpz_get_str(NULL, EXPORT_BASE, obj->pk->alpha);
-    result->Set(String::New("alpha"), String::New(s));
+    result->Set(Nan::New("alpha").ToLocalChecked(), Nan::New(s).ToLocalChecked());
 
     for (i = 0; i < S1; i++) {
         s = mpz_get_str(NULL, EXPORT_BASE, obj->pk->B[i]);
-		B->Set(i, String::New(s));
+		B->Set(i, Nan::New(s).ToLocalChecked());
 
 		s = mpz_get_str(NULL, EXPORT_BASE, obj->pk->c[i]);
-		c->Set(i, String::New(s));
+		c->Set(i, Nan::New(s).ToLocalChecked());
     }
 
-	result->Set(String::New("B"), B);
-	result->Set(String::New("c"), c);
+	result->Set(Nan::New("B").ToLocalChecked(), B);
+	result->Set(Nan::New("c").ToLocalChecked(), c);
 
-	return scope.Close(result);
+	info.GetReturnValue().Set(result);
 }
 
-Handle<Value> Crypto::Decrypt(const Arguments& args) {
-	HandleScope scope;
-
-	if (args.Length() < 1) {
-		ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
-		return scope.Close(Undefined());
+NAN_METHOD(Crypto::Decrypt) {
+	if (info.Length() < 1) {
+		Nan::ThrowTypeError(Nan::New("Wrong number of arguments").ToLocalChecked());
+		return;
 	}
 
-	if (!args[0]->IsString()) {
-		ThrowException(Exception::TypeError(String::New("Argument must be a string")));
-		return scope.Close(Undefined());
+	if (!info[0]->IsString()) {
+		Nan::ThrowTypeError(Nan::New("Argument must be a string").ToLocalChecked());
+		return;
 	}
 
-	String::Utf8Value str(args[0]->ToString());
+	v8::String::Utf8Value str(info[0]->ToString());
 
-	Crypto* obj = ObjectWrap::Unwrap<Crypto>(args.This());
+	Crypto* obj = Nan::ObjectWrap::Unwrap<Crypto>(info.This());
 
 	mpz_t c;
 	mpz_init(c);
@@ -114,25 +96,23 @@ Handle<Value> Crypto::Decrypt(const Arguments& args) {
 
 	mpz_clear(c);
 
-	return scope.Close(Number::New(m));
+    info.GetReturnValue().Set(m);
 }
 
-Handle<Value> Crypto::Recrypt(const Arguments& args) {
-	HandleScope scope;
-
-	if (args.Length() < 1) {
-		ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
-		return scope.Close(Undefined());
+NAN_METHOD(Crypto::Recrypt) {
+	if (info.Length() < 1) {
+		Nan::ThrowTypeError(Nan::New("Wrong number of arguments").ToLocalChecked());
+		return;
 	}
 
-	if (!args[0]->IsString()) {
-		ThrowException(Exception::TypeError(String::New("Argument must be a string")));
-		return scope.Close(Undefined());
+	if (!info[0]->IsString()) {
+		Nan::ThrowTypeError(Nan::New("Argument must be a string").ToLocalChecked());
+		return;
 	}
 
-	String::Utf8Value str(args[0]->ToString());
+	v8::String::Utf8Value str(info[0]->ToString());
 
-	Crypto* obj = ObjectWrap::Unwrap<Crypto>(args.This());
+	Crypto* obj = Nan::ObjectWrap::Unwrap<Crypto>(info.This());
 
 	mpz_t c;
 	mpz_init(c);
@@ -145,30 +125,28 @@ Handle<Value> Crypto::Recrypt(const Arguments& args) {
 
 	mpz_clear(c);
 
-	return scope.Close(String::New(s));
+    info.GetReturnValue().Set(Nan::New(s).ToLocalChecked());
 }
 
-Handle<Value> Crypto::Encrypt(const Arguments& args) {
-	HandleScope scope;
-
-	if (args.Length() < 1) {
-		ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
-		return scope.Close(Undefined());
+NAN_METHOD(Crypto::Encrypt) {
+	if (info.Length() < 1) {
+		Nan::ThrowTypeError(Nan::New("Wrong number of arguments").ToLocalChecked());
+		return;
 	}
 
-	if (!args[0]->IsNumber()) {
-		ThrowException(Exception::TypeError(String::New("Argument must be number")));
-		return scope.Close(Undefined());
+	if (!info[0]->IsNumber()) {
+		Nan::ThrowTypeError(Nan::New("Argument must be number").ToLocalChecked());
+		return;
 	}
 
-	int m = args[0]->NumberValue();
+	int m = info[0]->NumberValue();
 
 	if ((m != 0) && (m != 1)) {
-		ThrowException(Exception::TypeError(String::New("Argument must be either 0 or 1")));
-		return scope.Close(Undefined());
+		Nan::ThrowTypeError(Nan::New("Argument must be either 0 or 1").ToLocalChecked());
+		return;
 	}
 
-	Crypto* obj = ObjectWrap::Unwrap<Crypto>(args.This());
+	Crypto* obj = Nan::ObjectWrap::Unwrap<Crypto>(info.This());
 
 	mpz_t c;
 	mpz_init(c);
@@ -192,5 +170,5 @@ Handle<Value> Crypto::Encrypt(const Arguments& args) {
 
 	mpz_clear(c);
 
-	return scope.Close(String::New(s));
+    info.GetReturnValue().Set(Nan::New(s).ToLocalChecked());
 }

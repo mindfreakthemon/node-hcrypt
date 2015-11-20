@@ -1,23 +1,36 @@
 #include "operator_object.h"
 
-using namespace v8;
 using namespace std;
 
-Persistent<Function> Operator::constructor;
+Nan::Persistent<v8::Function> Operator::constructor;
 
-Operator::Operator(Handle<Object> o) {
+NAN_MODULE_INIT(Operator::Init) {
+  v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
+  tpl->SetClassName(Nan::New("Operator").ToLocalChecked());
+  tpl->InstanceTemplate()->SetInternalFieldCount(2);
+
+  Nan::SetPrototypeMethod(tpl, "add", Add);
+  Nan::SetPrototypeMethod(tpl, "mul", Mul);
+  Nan::SetPrototypeMethod(tpl, "fullAdd", FullAdd);
+  Nan::SetPrototypeMethod(tpl, "halfAdd", HalfAdd);
+
+  constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());
+  Nan::Set(target, Nan::New("Operator").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
+}
+
+Operator::Operator(v8::Local<v8::Object> o) {
 	fhe_pk_init(pk);
 
-	Local<Value> p = o->Get(String::New("p"));
+	v8::Local<v8::Value> p = o->Get(Nan::New("p").ToLocalChecked());
 //	Local<Value> alpha = o->Get(String::New("alpha"));
 
 	if (!p->IsString()/* || !alpha->IsString()*/) {
-		ThrowException(Exception::TypeError(String::New("Wrong argument")));
+		Nan::ThrowTypeError(Nan::New("Wrong argument").ToLocalChecked());
         return;
 	}
 
-	String::Utf8Value _p(p->ToString());
-//	String::Utf8Value _alpha(alpha->ToString());
+	v8::String::Utf8Value _p(p->ToString());
+//	v8::String::Utf8Value _alpha(alpha->ToString());
 //
 //	Local<Value> B = o->Get(String::New("B"));
 //	Local<Value> c = o->Get(String::New("c"));
@@ -52,70 +65,41 @@ Operator::~Operator() {
 	fhe_pk_clear(pk);
 }
 
-void Operator::Init(Handle<Object> exports) {
-	// Prepare constructor template
-	Local<FunctionTemplate> tpl = FunctionTemplate::New(New);
-
-	tpl->SetClassName(String::NewSymbol("Operator"));
-	tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
-	// Prototype
-	tpl->PrototypeTemplate()->Set(String::NewSymbol("add"),
-		FunctionTemplate::New(Add)->GetFunction());
-
-	tpl->PrototypeTemplate()->Set(String::NewSymbol("mul"),
-        FunctionTemplate::New(Mul)->GetFunction());
-
-	tpl->PrototypeTemplate()->Set(String::NewSymbol("fullAdd"),
-        FunctionTemplate::New(FullAdd)->GetFunction());
-
-	tpl->PrototypeTemplate()->Set(String::NewSymbol("halfAdd"),
-        FunctionTemplate::New(HalfAdd)->GetFunction());
-
-	constructor = Persistent<Function>::New(tpl->GetFunction());
-	exports->Set(String::NewSymbol("Operator"), constructor);
-}
-
-Handle<Value> Operator::New(const Arguments& args) {
-	HandleScope scope;
-
-	if (args.Length() < 1) {
-		ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
-        return scope.Close(Undefined());
+NAN_METHOD(Operator::New) {
+    if (info.Length() < 1) {
+		Nan::ThrowTypeError(Nan::New("Wrong number of arguments").ToLocalChecked());
+        return;
 	}
 
-	if (!args[0]->IsObject()) {
-        ThrowException(Exception::TypeError(String::New("Argument must be a plain object")));
-        return scope.Close(Undefined());
+	if (!info[0]->IsObject()) {
+        Nan::ThrowTypeError(Nan::New("Argument must be a plain object").ToLocalChecked());
+        return;
     }
 
-	if (args.IsConstructCall()) {
-        // Invoked as constructor: `new Operator(...)`
-        Operator* obj = new Operator(args[0]->ToObject());
-        obj->Wrap(args.This());
-        return args.This();
+    if (info.IsConstructCall()) {
+        Operator *obj = new Operator(info[0]->ToObject());
+        obj->Wrap(info.This());
+        info.GetReturnValue().Set(info.This());
     } else {
-        // Invoked as plain function `Operator(...)`, turn into construct call.
-        Local<Value> array = args.Data();
-        return scope.Close(constructor->NewInstance(args.Length(), &array));
+        v8::Local<v8::Value> array = info.Data();
+        v8::Local<v8::Function> cons = Nan::New(constructor);
+        info.GetReturnValue().Set(cons->NewInstance(info.Length(), &array));
     }
 }
 
-Handle<Value> Operator::Add(const Arguments& args) {
-	HandleScope scope;
-
-    if (args.Length() < 2) {
-        ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
-        return scope.Close(Undefined());
+NAN_METHOD(Operator::Add) {
+    if (info.Length() < 2) {
+        Nan::ThrowTypeError(Nan::New("Wrong number of arguments").ToLocalChecked());
+        return;
     }
 
-    if (!args[0]->IsString() || !args[1]->IsString()) {
-        ThrowException(Exception::TypeError(String::New("Wrong arguments")));
-        return scope.Close(Undefined());
+    if (!info[0]->IsString() || !info[1]->IsString()) {
+        Nan::ThrowTypeError(Nan::New("Wrong arguments").ToLocalChecked());
+        return;
     }
 
-    String::Utf8Value a(args[0]->ToString());
-    String::Utf8Value b(args[1]->ToString());
+    v8::String::Utf8Value a(info[0]->ToString());
+    v8::String::Utf8Value b(info[1]->ToString());
 
 	mpz_t _a, _b, _res;
     mpz_init(_a);
@@ -125,7 +109,7 @@ Handle<Value> Operator::Add(const Arguments& args) {
     mpz_set_str(_a, *a, EXPORT_BASE);
     mpz_set_str(_b, *b, EXPORT_BASE);
 
-    Operator* obj = ObjectWrap::Unwrap<Operator>(args.This());
+	Operator* obj = Nan::ObjectWrap::Unwrap<Operator>(info.This());
 
 	fhe_add(_res, _a, _b, obj->pk);
 
@@ -135,24 +119,22 @@ Handle<Value> Operator::Add(const Arguments& args) {
 	mpz_clear(_b);
 	mpz_clear(_res);
 
-	return scope.Close(String::New(s));
+	info.GetReturnValue().Set(Nan::New(s).ToLocalChecked());
 }
 
-Handle<Value> Operator::Mul(const Arguments& args) {
-	HandleScope scope;
-
-    if (args.Length() < 2) {
-        ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
-        return scope.Close(Undefined());
+NAN_METHOD(Operator::Mul) {
+    if (info.Length() < 2) {
+        Nan::ThrowTypeError(Nan::New("Wrong number of arguments").ToLocalChecked());
+        return;
     }
 
-    if (!args[0]->IsString() || !args[1]->IsString()) {
-        ThrowException(Exception::TypeError(String::New("Wrong arguments")));
-        return scope.Close(Undefined());
+    if (!info[0]->IsString() || !info[1]->IsString()) {
+        Nan::ThrowTypeError(Nan::New("Wrong arguments").ToLocalChecked());
+        return;
     }
 
-    String::Utf8Value a(args[0]->ToString());
-    String::Utf8Value b(args[1]->ToString());
+    v8::String::Utf8Value a(info[0]->ToString());
+    v8::String::Utf8Value b(info[1]->ToString());
 
 	mpz_t _a, _b, _res;
     mpz_init(_a);
@@ -162,7 +144,7 @@ Handle<Value> Operator::Mul(const Arguments& args) {
     mpz_set_str(_a, *a, EXPORT_BASE);
     mpz_set_str(_b, *b, EXPORT_BASE);
 
-    Operator* obj = ObjectWrap::Unwrap<Operator>(args.This());
+	Operator* obj = Nan::ObjectWrap::Unwrap<Operator>(info.This());
 
 	fhe_mul(_res, _a, _b, obj->pk);
 
@@ -172,26 +154,24 @@ Handle<Value> Operator::Mul(const Arguments& args) {
 	mpz_clear(_b);
 	mpz_clear(_res);
 
-	return scope.Close(String::New(s));
+	info.GetReturnValue().Set(Nan::New(s).ToLocalChecked());
 }
 
-Handle<Value> Operator::FullAdd(const Arguments& args) {
-	HandleScope scope;
-
-    if (args.Length() < 3) {
-        ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
-        return scope.Close(Undefined());
+NAN_METHOD(Operator::FullAdd) {
+    if (info.Length() < 3) {
+        Nan::ThrowTypeError(Nan::New("Wrong number of arguments").ToLocalChecked());
+        return;
     }
 
-    if (!args[0]->IsString() || !args[1]->IsString() ||
-        !args[2]->IsString()) {
-        ThrowException(Exception::TypeError(String::New("Wrong arguments")));
-        return scope.Close(Undefined());
+    if (!info[0]->IsString() || !info[1]->IsString() ||
+        !info[2]->IsString()) {
+        Nan::ThrowTypeError(Nan::New("Wrong arguments").ToLocalChecked());
+        return;
     }
 
-    String::Utf8Value c_in(args[0]->ToString());
-    String::Utf8Value a(args[1]->ToString());
-    String::Utf8Value b(args[2]->ToString());
+    v8::String::Utf8Value c_in(info[0]->ToString());
+    v8::String::Utf8Value a(info[1]->ToString());
+    v8::String::Utf8Value b(info[2]->ToString());
 
 	mpz_t _a, _b, _c_in, _c_out, _res;
     mpz_init(_c_in);
@@ -204,7 +184,7 @@ Handle<Value> Operator::FullAdd(const Arguments& args) {
     mpz_set_str(_a, *a, EXPORT_BASE);
     mpz_set_str(_b, *b, EXPORT_BASE);
 
-    Operator* obj = ObjectWrap::Unwrap<Operator>(args.This());
+	Operator* obj = Nan::ObjectWrap::Unwrap<Operator>(info.This());
 
 	fhe_fulladd(_res, _c_out, _a, _b, _c_in, obj->pk);
 
@@ -217,30 +197,29 @@ Handle<Value> Operator::FullAdd(const Arguments& args) {
 	mpz_clear(_c_out);
 	mpz_clear(_res);
 
-	Local<Array> array = Array::New(2);
+    v8::Isolate* isolate = info.GetIsolate();
+	v8::Local<v8::Array> array = v8::Array::New(isolate, 2);
 
-	array->Set(0, String::New(s1));
-	array->Set(1, String::New(s2));
+	array->Set(0, Nan::New(s1).ToLocalChecked());
+	array->Set(1, Nan::New(s2).ToLocalChecked());
 
-	return scope.Close(array);
+	info.GetReturnValue().Set(array);
 }
 
 
-Handle<Value> Operator::HalfAdd(const Arguments& args) {
-	HandleScope scope;
-
-    if (args.Length() < 2) {
-        ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
-        return scope.Close(Undefined());
+NAN_METHOD(Operator::HalfAdd) {
+    if (info.Length() < 2) {
+        Nan::ThrowTypeError(Nan::New("Wrong number of arguments").ToLocalChecked());
+        return;
     }
 
-    if (!args[0]->IsString() || !args[1]->IsString()) {
-        ThrowException(Exception::TypeError(String::New("Wrong arguments")));
-        return scope.Close(Undefined());
+    if (!info[0]->IsString() || !info[1]->IsString()) {
+        Nan::ThrowTypeError(Nan::New("Wrong arguments").ToLocalChecked());
+        return;
     }
 
-    String::Utf8Value a(args[0]->ToString());
-    String::Utf8Value b(args[1]->ToString());
+    v8::String::Utf8Value a(info[0]->ToString());
+    v8::String::Utf8Value b(info[1]->ToString());
 
 	mpz_t _a, _b, _c_out, _res;
     mpz_init(_a);
@@ -251,7 +230,7 @@ Handle<Value> Operator::HalfAdd(const Arguments& args) {
     mpz_set_str(_a, *a, EXPORT_BASE);
     mpz_set_str(_b, *b, EXPORT_BASE);
 
-    Operator* obj = ObjectWrap::Unwrap<Operator>(args.This());
+	Operator* obj = Nan::ObjectWrap::Unwrap<Operator>(info.This());
 
 	fhe_halfadd(_res, _c_out, _a, _b, obj->pk);
 
@@ -263,10 +242,11 @@ Handle<Value> Operator::HalfAdd(const Arguments& args) {
 	mpz_clear(_c_out);
 	mpz_clear(_res);
 
-	Local<Array> array = Array::New(2);
+    v8::Isolate* isolate = info.GetIsolate();
+	v8::Local<v8::Array> array = v8::Array::New(isolate, 2);
 
-	array->Set(0, String::New(s1));
-	array->Set(1, String::New(s2));
+	array->Set(0, Nan::New(s1).ToLocalChecked());
+    array->Set(1, Nan::New(s2).ToLocalChecked());
 
-	return scope.Close(array);
+	info.GetReturnValue().Set(array);
 }
