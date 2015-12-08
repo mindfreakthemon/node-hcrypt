@@ -18,6 +18,7 @@ private:
     static NAN_METHOD(HalfAdd);
     static NAN_METHOD(FullAdd);
     static NAN_METHOD(Mul);
+    static NAN_METHOD(Recrypt);
     static Nan::Persistent<v8::Function> constructor;
 
     fhe_pk_t pk;

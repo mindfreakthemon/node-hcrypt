@@ -11,7 +11,6 @@ NAN_MODULE_INIT(Crypto::Init) {
 
   Nan::SetPrototypeMethod(tpl, "encrypt", Encrypt);
   Nan::SetPrototypeMethod(tpl, "decrypt", Decrypt);
-  Nan::SetPrototypeMethod(tpl, "recrypt", Recrypt);
   Nan::SetPrototypeMethod(tpl, "export", Export);
 
   constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());
@@ -99,35 +98,6 @@ NAN_METHOD(Crypto::Decrypt) {
     info.GetReturnValue().Set(m);
 }
 
-NAN_METHOD(Crypto::Recrypt) {
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError(Nan::New("Wrong number of arguments").ToLocalChecked());
-		return;
-	}
-
-	if (!info[0]->IsString()) {
-		Nan::ThrowTypeError(Nan::New("Argument must be a string").ToLocalChecked());
-		return;
-	}
-
-	v8::String::Utf8Value str(info[0]->ToString());
-
-	Crypto* obj = Nan::ObjectWrap::Unwrap<Crypto>(info.This());
-
-	mpz_t c;
-	mpz_init(c);
-
-	mpz_set_str(c, *str, EXPORT_BASE);
-
-	fhe_recrypt(c, obj->pk);
-
-	char* s = mpz_get_str(NULL, EXPORT_BASE, c);
-
-	mpz_clear(c);
-
-    info.GetReturnValue().Set(Nan::New(s).ToLocalChecked());
-}
-
 NAN_METHOD(Crypto::Encrypt) {
 	if (info.Length() < 1) {
 		Nan::ThrowTypeError(Nan::New("Wrong number of arguments").ToLocalChecked());
@@ -152,19 +122,6 @@ NAN_METHOD(Crypto::Encrypt) {
 	mpz_init(c);
 
 	fhe_encrypt(c, obj->pk, m);
-
-//	// HACK
-//	mpz_t c0;
-//	mpz_init(c0);
-//	fhe_encrypt(c0, obj->pk, 0);
-//
-//	srand(time(NULL));
-//	int i, r = rand() % 2;
-//
-//	for (i = 0; i < r; i++) {
-//		fhe_add(c, c, c0, obj->pk);
-//		fhe_recrypt(c, obj->pk);
-//	}
 
 	char* s = mpz_get_str(NULL, EXPORT_BASE, c);
 

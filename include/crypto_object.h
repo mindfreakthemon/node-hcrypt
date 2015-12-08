@@ -16,7 +16,6 @@ private:
     static NAN_METHOD(New);
     static NAN_METHOD(Encrypt);
     static NAN_METHOD(Decrypt);
-    static NAN_METHOD(Recrypt);
     static NAN_METHOD(Export);
     static Nan::Persistent<v8::Function> constructor;
 

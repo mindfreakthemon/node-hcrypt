@@ -13,6 +13,7 @@ NAN_MODULE_INIT(Operator::Init) {
   Nan::SetPrototypeMethod(tpl, "mul", Mul);
   Nan::SetPrototypeMethod(tpl, "fullAdd", FullAdd);
   Nan::SetPrototypeMethod(tpl, "halfAdd", HalfAdd);
+  Nan::SetPrototypeMethod(tpl, "recrypt", Recrypt);
 
   constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());
   Nan::Set(target, Nan::New("Operator").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
@@ -22,43 +23,43 @@ Operator::Operator(v8::Local<v8::Object> o) {
 	fhe_pk_init(pk);
 
 	v8::Local<v8::Value> p = o->Get(Nan::New("p").ToLocalChecked());
-//	Local<Value> alpha = o->Get(String::New("alpha"));
+	v8::Local<v8::Value> alpha = o->Get(Nan::New("alpha").ToLocalChecked());
 
-	if (!p->IsString()/* || !alpha->IsString()*/) {
+	if (!p->IsString() || !alpha->IsString()) {
 		Nan::ThrowTypeError(Nan::New("Wrong argument").ToLocalChecked());
         return;
 	}
 
 	v8::String::Utf8Value _p(p->ToString());
-//	v8::String::Utf8Value _alpha(alpha->ToString());
-//
-//	Local<Value> B = o->Get(String::New("B"));
-//	Local<Value> c = o->Get(String::New("c"));
-//
-//	if (!B->IsArray() || !c->IsArray()) {
-//        ThrowException(Exception::TypeError(String::New("Wrong argument")));
-//        return;
-//    }
-//
-//    Local<Array> _B = Local<Array>::Cast(B);
-//    Local<Array> _c = Local<Array>::Cast(c);
-//
-//    if (_B->Length() != S1 || _c->Length() != S1) {
-//        ThrowException(Exception::TypeError(String::New("Wrong argument")));
-//        return;
-//    }
+	v8::String::Utf8Value _alpha(alpha->ToString());
+
+	v8::Local<v8::Value> B = o->Get(Nan::New("B").ToLocalChecked());
+	v8::Local<v8::Value> c = o->Get(Nan::New("c").ToLocalChecked());
+
+	if (!B->IsArray() || !c->IsArray()) {
+        Nan::ThrowTypeError(Nan::New("Wrong argument").ToLocalChecked());
+        return;
+    }
+
+    v8::Local<v8::Array> _B = v8::Local<v8::Array>::Cast(B);
+    v8::Local<v8::Array> _c = v8::Local<v8::Array>::Cast(c);
+
+    if (_B->Length() != S1 || _c->Length() != S1) {
+        Nan::ThrowTypeError(Nan::New("Wrong argument").ToLocalChecked());
+        return;
+    }
 
 	mpz_set_str(pk->p, *_p, EXPORT_BASE);
-//    mpz_set_str(pk->alpha, *_alpha, EXPORT_BASE);
-//
-//    int i;
-//    for (i = 0; i < S1; i++) {
-//        String::Utf8Value _Bi(_B->Get(i)->ToString());
-//        String::Utf8Value _ci(_c->Get(i)->ToString());
-//
-//        mpz_set_str(pk->B[i], *_Bi, EXPORT_BASE);
-//        mpz_set_str(pk->c[i], *_ci, EXPORT_BASE);
-//    }
+    mpz_set_str(pk->alpha, *_alpha, EXPORT_BASE);
+
+    int i;
+    for (i = 0; i < S1; i++) {
+        v8::String::Utf8Value _Bi(_B->Get(i)->ToString());
+        v8::String::Utf8Value _ci(_c->Get(i)->ToString());
+
+        mpz_set_str(pk->B[i], *_Bi, EXPORT_BASE);
+        mpz_set_str(pk->c[i], *_ci, EXPORT_BASE);
+    }
 }
 
 Operator::~Operator() {
@@ -249,4 +250,33 @@ NAN_METHOD(Operator::HalfAdd) {
     array->Set(1, Nan::New(s2).ToLocalChecked());
 
 	info.GetReturnValue().Set(array);
+}
+
+NAN_METHOD(Operator::Recrypt) {
+	if (info.Length() < 1) {
+		Nan::ThrowTypeError(Nan::New("Wrong number of arguments").ToLocalChecked());
+		return;
+	}
+
+	if (!info[0]->IsString()) {
+		Nan::ThrowTypeError(Nan::New("Argument must be a string").ToLocalChecked());
+		return;
+	}
+
+	v8::String::Utf8Value str(info[0]->ToString());
+
+	Operator* obj = Nan::ObjectWrap::Unwrap<Operator>(info.This());
+
+	mpz_t c;
+	mpz_init(c);
+
+	mpz_set_str(c, *str, EXPORT_BASE);
+
+	fhe_recrypt(c, obj->pk);
+
+	char* s = mpz_get_str(NULL, EXPORT_BASE, c);
+
+	mpz_clear(c);
+
+    info.GetReturnValue().Set(Nan::New(s).ToLocalChecked());
 }

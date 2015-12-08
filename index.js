@@ -1,37 +1,53 @@
+"use strict";
+
 var assert = require('assert'),
 	scarab = require('./lib/scarab');
 
 var crypto = new scarab.Crypto(),
-	operator = new scarab.Operator(crypto.export());
+	publicKey = crypto.export(),
+	operator = new scarab.Operator(publicKey);
 
 var t = process.hrtime();
 
 /* CLIENT HAS THE DATA */
 
-var a = 22222,
-	b = 321;
+const BITS_N = 15;
+const TRY_IT = 20;
+
+var a = 1,
+	b = 4;
 
 /* CLIENT ENCODES HIS DATA */
 
-var _encoded = scarab.encrypt(crypto, a, b);
+var _a = scarab.encrypt(crypto, a, BITS_N),
+	_b = scarab.encrypt(crypto, b, BITS_N);
 
-/* CLIENT SENDS crypto.export() and _encoded TO THE SERVER */
+/* CLIENT SENDS publicKey and _a and _b TO THE SERVER */
 
-console.log(_encoded);
+/* SERVER PERFORMS THE OPERATION WITH THE _a and _b AND publicKey */
 
-/* SERVER PERFORMS THE OPERATION WITH THE _encoded AND crypto.export() */
+var _r = _a;
 
-var _encoded_result = scarab.add(operator, _encoded.a, _encoded.b);
+
+for (let i = 1; i <= TRY_IT; i++) {
+	_r = scarab.add(operator, _r, _b);
+	//console.log('add', scarab.decrypt(crypto, _r));
+
+	scarab.recrypt(operator, _r);
+	//console.log('rpt', scarab.decrypt(crypto, _r));
+}
 
 /* SERVER SENDS RESULT TO THE CLIENT */
 
 /* CLIENT DECRYPTS THE RESULT */
 
-var result = scarab.decrypt(crypto, _encoded_result);
+var r = scarab.decrypt(crypto, _r);
 
 t = process.hrtime(t);
 
-assert.equal(result, a + b);
+//assert.equal(result, a + b);
 
 console.log('took %d', t[0] + t[1] * 1e-9);
-console.log('r = %d, should be %d', result, a + b);
+console.log('x =', scarab.to_bin_array(a + TRY_IT * b));
+console.log('r =', scarab.to_bin_array(r));
+console.log('r = %d, should be %d', r, a + TRY_IT * b);
