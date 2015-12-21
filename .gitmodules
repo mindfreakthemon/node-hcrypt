@@ -3,3 +3,6 @@
 	url = https://github.com/mindfreakthemon/scarab.git
 	branch = master
 
+[submodule "deps/flint"]
+	path = deps/flint
+	url = https://github.com/mindfreakthemon/flint2.git
