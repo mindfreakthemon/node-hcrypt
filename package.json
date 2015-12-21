@@ -4,7 +4,7 @@
   "description": "node-hcrypt ===========",
   "main": "index.js",
   "scripts": {
-    "install": "node-gyp rebuild"
+    "install": "node-gyp rebuild -- --no-duplicate-basename-check"
   },
   "repository": {
     "type": "git",
@@ -21,7 +21,6 @@
   },
   "homepage": "https://github.com/mindfreakthemon/node-hcrypt",
   "dependencies": {
-    "bigint": "^0.4.2",
     "nan": "^2.1.0"
   }
 }
