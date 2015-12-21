@@ -2,7 +2,7 @@
   "name": "node-hcrypt",
   "version": "0.0.1",
   "description": "node-hcrypt ===========",
-  "main": "index.js",
+  "main": "lib/scarab.js",
   "scripts": {
     "install": "node-gyp rebuild -- --no-duplicate-basename-check"
   },
@@ -13,7 +13,7 @@
   "keywords": [
     "hcrypt"
   ],
-  "author": "",
+  "author": "Vitalii Rakovtsii (mfthemon@gmail.com)",
   "license": "MIT",
   "gypfile": true,
   "bugs": {
