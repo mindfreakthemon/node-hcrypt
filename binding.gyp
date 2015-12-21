@@ -17,7 +17,7 @@
             "libraries": [
                 "-Wl,-rpath,<!(pwd)/build/Release/",
                 "./Release/libscarab.so",
-                "/usr/local/lib/libflint.so",
+                "-lflint",
                 "-lgmp",
                 "-lmpfr"
 			]

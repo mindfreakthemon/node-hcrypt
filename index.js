@@ -11,11 +11,11 @@ var t = process.hrtime();
 
 /* CLIENT HAS THE DATA */
 
-const BITS_N = 15;
+const BITS_N = 6;
 const TRY_IT = 20;
 
-var a = 1,
-	b = 4;
+var a = 2,
+	b = 8;
 
 /* CLIENT ENCODES HIS DATA */
 
@@ -24,18 +24,25 @@ var _a = scarab.encrypt(crypto, a, BITS_N),
 
 /* CLIENT SENDS publicKey and _a and _b TO THE SERVER */
 
+//console.log('------------------------------');
+//console.log('a =', _a);
+//console.log('------------------------------');
+//console.log('b =', _b);
+//console.log('------------------------------');
+
+var _r = scarab.mul(operator, _a, _b);
+
 /* SERVER PERFORMS THE OPERATION WITH THE _a and _b AND publicKey */
 
-var _r = _a;
+//var _r = _a;
+//
+//for (let i = 1; i <= TRY_IT; i++) {
+//	_r = scarab.add(operator, _r, _b);
+//	console.log('add', scarab.decrypt(crypto, _r));
 
-
-for (let i = 1; i <= TRY_IT; i++) {
-	_r = scarab.add(operator, _r, _b);
-	//console.log('add', scarab.decrypt(crypto, _r));
-
-	scarab.recrypt(operator, _r);
+	//scarab.recrypt(operator, _r);
 	//console.log('rpt', scarab.decrypt(crypto, _r));
-}
+//}
 
 /* SERVER SENDS RESULT TO THE CLIENT */
 
@@ -48,6 +55,7 @@ t = process.hrtime(t);
 //assert.equal(result, a + b);
 
 console.log('took %d', t[0] + t[1] * 1e-9);
-console.log('x =', scarab.to_bin_array(a + TRY_IT * b));
-console.log('r =', scarab.to_bin_array(r));
+//console.log('x =', scarab.to_bin_array(a + TRY_IT * b));
+//console.log('r =', scarab.to_bin_array(r));
+console.log('a = %d, b = %d', a, b);
 console.log('r = %d, should be %d', r, a + TRY_IT * b);
