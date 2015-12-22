@@ -48,8 +48,8 @@ rA = scarab.decrypt(crypto, _rA);
 
 console.log('rM = %d, should be %d', rM, a * b);
 console.log('rA = %d, should be %d', rA, a + TRY_IT * b);
-assert.equal(rM, a + TRY_IT * b);
-assert.equal(rA, a * b);
+assert.equal(rM, a * b);
+assert.equal(rA, a + TRY_IT * b);
 
 t = process.hrtime(t);
 console.log('took %d', t[0] + t[1] * 1e-9);

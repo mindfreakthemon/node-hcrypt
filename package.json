@@ -1,7 +1,7 @@
 {
   "name": "node-hcrypt",
-  "version": "0.0.1",
-  "description": "node-hcrypt ===========",
+  "version": "0.0.2",
+  "description": "Fully homomorphic encryption implementation for node.js",
   "main": "lib/scarab.js",
   "scripts": {
     "install": "node-gyp rebuild -- --no-duplicate-basename-check"
