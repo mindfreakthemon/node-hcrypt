@@ -16,6 +16,7 @@ You must have GMP (5.0.0+ or MPIR 2.6.0+) and MPFR (3.0.0+) libraries installed 
 Also, build tools are required for the native addon.
 
 For Debian-based: ```sudo apt-get install libgmp-dev libmpfr-dev libmpfr4 gcc g++ automake autoconf```
+
 For RHEL-based: ```sudo yum install gmp mpfr gcc gcc-c++ automake autoconf```, but note that gmp and mpfr versions in the repo are outdated so you should just compile them from sources.
 
 On Windows you can use cygwin, just don't forget to set GMP and MPFR to *devel* while installing.
@@ -30,7 +31,7 @@ GMP: https://gmplib.org/#DOWNLOAD
 
 #### To Install
 
-```npm instal node-hcrypt```
+```npm install node-hcrypt```
 
 The installation may take a while.
 
