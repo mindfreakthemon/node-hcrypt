@@ -41,7 +41,7 @@ The installation may take a while.
 
 The module exports two main object types: Crypto and Operator. 
 Crypto provides with encrypting / decrypting functionality while Operator deals with the operations on encrypted data.
-Module also exports 
+Module also exports helpers for converting any arbitrary numbers and performing operations with them, but they will be integrated into the mentioned above object types soon. 
 
 ##### Crypto
 ```
@@ -74,8 +74,8 @@ var operator = new hcrypt.Operator(crypto.export());
 | ---- | ----- |
 | add(string encryptedA, string encryptedB):string encryptedC | Performs logical addition. |
 | mul(string encryptedA, string encryptedB):string encryptedC | Performs logical multiplication. |
-| halfAdd(string encryptedA, string encryptedB):\[string encryptedC, string carriageD] | Performs half-addition with carriege return. |
-| fullAdd(string carriageI, string encryptedA, string encryptedB):\[string encryptedC, string carriegeD] | Performs full addition with carriege return. |
+| halfAdd(string encryptedA, string encryptedB):\[string encryptedC, string carryD] | Performs half-addition with carry in return. |
+| fullAdd(string carryI, string encryptedA, string encryptedB):\[string encryptedC, string carryD] | Performs full addition with a carry in return. |
 | recrypt(string encryptedI):string encryptedO | Performs cryptographic refresh. Should be done after 2-3 operations under the same encrypted value. |
 
 
