@@ -54,7 +54,7 @@ var crypto = new hcrypt.Crypto();
 
 | Method | Description |
 | ---- | ----- |
-| encrypt(int bit):void | Encrypts 1 or 0. Returns encrypted value. |
+| encrypt(int bit):string | Encrypts 1 or 0. Returns encrypted value as a base64 string. |
 | decrypt(string encrypted):int | Decrypts. Returns 1 or 0. |
 | export():object | Returns public key for use with Operator. |
 
