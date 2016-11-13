@@ -1,6 +1,6 @@
 {
   "name": "node-hcrypt",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Fully homomorphic encryption implementation for node.js",
   "main": "lib/scarab.js",
   "scripts": {
