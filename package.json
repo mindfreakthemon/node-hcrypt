@@ -1,10 +1,10 @@
 {
   "name": "node-hcrypt",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Fully homomorphic encryption implementation for node.js",
   "main": "lib/scarab.js",
   "scripts": {
-    "install": "node-gyp rebuild -- --no-duplicate-basename-check"
+    "install": "git submodule update --init --recursive && node-gyp rebuild -- --no-duplicate-basename-check"
   },
   "repository": {
     "type": "git",
@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/mindfreakthemon/node-hcrypt",
   "dependencies": {
-    "nan": "^2.1.0"
+    "nan": "^2.1.0",
+    "node-gyp": "^3.4.0"
   }
 }
