@@ -12,8 +12,8 @@
 				"include"
 			],
 			"dependencies": [
-				"deps/scarab/libscarab.gyp:scarab",
-				"deps/flint/libflint.gyp:flint"
+				"scarab/libscarab.gyp:scarab",
+				"scarab/libflint.gyp:flint"
 			],
 			"libraries": [
 				"-Wl,-rpath,<!(pwd)/build/Release/",

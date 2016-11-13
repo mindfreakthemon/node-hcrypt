@@ -1,0 +1,4 @@
+[submodule "scarab"]
+	path = scarab
+	url = git@github.com:mindfreakthemon/scarab.git
+	branch = master
