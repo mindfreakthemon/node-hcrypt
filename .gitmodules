@@ -1,8 +1,0 @@
-[submodule "deps/scarab"]
-	path = deps/scarab
-	url = https://github.com/mindfreakthemon/scarab.git
-	branch = master
-
-[submodule "deps/flint"]
-	path = deps/flint
-	url = https://github.com/mindfreakthemon-contributes/flint2.git
