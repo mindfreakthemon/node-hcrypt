@@ -2,7 +2,7 @@ hcrypt
 ===========
 ### Fully homomorphic encryption implementation for node.js
 
-This package provides an API for node.js application to use homomorphic encryption to perform some computations.
+This package provides an API for node.js application to use homomorphic encryption to perform computations.
 
 Only integers are currently supported.
 
@@ -13,19 +13,24 @@ Operations supported: algebraic addition and multiplication.
 #### Prerequisites
 
 You must have GMP (5.0.0+ or MPIR 2.6.0+) and MPFR (3.0.0+) libraries installed in the system.
-Also, build tools are required for the native addon.
 
-For Debian-based: ```sudo apt-get install libgmp-dev libmpfr-dev libmpfr4 gcc g++ automake autoconf```
+##### Debian-based
+```sudo apt-get install libgmp-dev libmpfr-dev libmpfr4 gcc g++ automake autoconf```.
 
-For RHEL-based: ```sudo yum install gmp mpfr gcc gcc-c++ automake autoconf```, but note that gmp and mpfr versions in the repo are outdated so you should just compile them from sources.
+##### RHEL-based
+```sudo yum install gcc gcc-c++ automake autoconf```.
+GMP and MPFR versions in the repo are outdated so you should just compile them from sources. Look for download links below.
 
-On Windows you can use cygwin, just don't forget to set GMP and MPFR to *devel* while installing.
+
+##### Windows
+Use cygwin, just don't forget to set GMP and MPFR to *devel* while installing.
 
 This package should work with latest stable npm and node, but may also work with any below. 
 If you run into any problems while installing be sure to udpate npm first.
 
-MPFR: http://www.mpfr.org/mpfr-current/#download
-GMP: https://gmplib.org/#DOWNLOAD
+#### Downloads
+* MPFR: http://www.mpfr.org/mpfr-current/#download
+* GMP: https://gmplib.org/#DOWNLOAD
 
 ---
 
@@ -33,7 +38,7 @@ GMP: https://gmplib.org/#DOWNLOAD
 
 ```npm install node-hcrypt```
 
-The installation may take a while.
+The installation may take awhile.
 
 ----
 
