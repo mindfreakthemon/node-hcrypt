@@ -4,7 +4,8 @@
   "description": "Fully homomorphic encryption implementation for node.js",
   "main": "lib/scarab.js",
   "scripts": {
-    "install": "node-gyp rebuild -- --no-duplicate-basename-check"
+    "install": "node-gyp rebuild -- --no-duplicate-basename-check",
+    "test": "node example.js"
   },
   "repository": {
     "type": "git",

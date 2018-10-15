@@ -99,11 +99,3 @@ var operator = new hcrypt.Operator(crypto.export());
 | fullAdd(string carryI, string encryptedA, string encryptedB):\[string encryptedC, string carryD] | Performs full addition with a carry in return. |
 | recrypt(string encryptedI):string encryptedO | Performs cryptographic refresh. Should be done after 2-3 operations under the same encrypted value. |
 
-
-#### Tests
-
-*WIP*
-
-#### License
-
-MIT
