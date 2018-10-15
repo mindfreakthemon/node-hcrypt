@@ -12,13 +12,12 @@
 				"include"
 			],
 			"dependencies": [
-				"scarab/libscarab.gyp:scarab",
-				"scarab/libflint.gyp:flint"
+				"scarab/libscarab.gyp:scarab"
 			],
 			"libraries": [
 				"-Wl,-rpath,<!(pwd)/build/Release/",
 				"-L./Release/libscarab.a",
-				"-L./Release/libflint.a",
+				"-lflint",
 				"-lgmp",
 				"-lmpfr"
 			]

@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/mindfreakthemon/node-hcrypt",
   "dependencies": {
-    "nan": "^2.1.0",
-    "node-gyp": "^3.4.0"
+    "nan": "^2.11.1",
+    "node-gyp": "^3.8.0"
   }
 }
