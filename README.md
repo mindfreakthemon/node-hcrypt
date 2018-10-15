@@ -2,7 +2,9 @@ node-hcrypt
 ===========
 ### Fully homomorphic encryption implementation for node.js
 
-[![CircleCI](https://circleci.com/gh/mindfreakthemon/node-hcrypt.svg?style=svg)](https://circleci.com/gh/mindfreakthemon/node-hcrypt)
+[![dependencies][deps-image]][deps-url] [![dev-dependencies][dev-deps-image]][dev-deps-url] [![CircleCI](https://circleci.com/gh/mindfreakthemon/node-hcrypt.svg?style=shield)](https://circleci.com/gh/mindfreakthemon/node-hcrypt)
+
+[![NPM][npm-image]][npm-url]
 
 This package provides an API for node.js application to use homomorphic encryption to perform computations.
 
@@ -99,3 +101,10 @@ var operator = new hcrypt.Operator(crypto.export());
 | fullAdd(string carryI, string encryptedA, string encryptedB):\[string encryptedC, string carryD] | Performs full addition with a carry in return. |
 | recrypt(string encryptedI):string encryptedO | Performs cryptographic refresh. Should be done after 2-3 operations under the same encrypted value. |
 
+
+[deps-image]: https://img.shields.io/david/mindfreakthemon/node-hcrypt.svg?style=flat-square
+[deps-url]: https://david-dm.org/mindfreakthemon/node-hcrypt
+[dev-deps-image]: https://img.shields.io/david/dev/mindfreakthemon/node-hcrypt.svg?style=flat-square
+[dev-deps-url]: https://david-dm.org/mindfreakthemon/node-hcrypt?type=dev
+[npm-image]: https://nodei.co/npm/node-hcrypt.png?downloads=true
+[npm-url]: https://npmjs.org/package/node-hcrypt
