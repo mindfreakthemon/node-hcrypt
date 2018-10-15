@@ -1,7 +1,9 @@
 FROM ubuntu:cosmic as debian-based
 
-WORKDIR /usr/local/scarab
-COPY . /usr/local/scarab
+WORKDIR /usr/local/node-hcrypt
+
+COPY . /usr/local/node-hcrypt
+
 RUN apt-get update && \
     apt-get -yy install libflint-2.5.2 libflint-dev libgmp-dev libmpfr-dev gcc g++ make automake autoconf gyp
 
