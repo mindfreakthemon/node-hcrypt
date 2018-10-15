@@ -1,6 +1,8 @@
-hcrypt
+node-hcrypt
 ===========
 ### Fully homomorphic encryption implementation for node.js
+
+[![CircleCI](https://circleci.com/gh/mindfreakthemon/node-hcrypt.svg?style=svg)](https://circleci.com/gh/mindfreakthemon/node-hcrypt)
 
 This package provides an API for node.js application to use homomorphic encryption to perform computations.
 
@@ -9,36 +11,50 @@ Only integers are currently supported.
 Operations supported: algebraic addition and multiplication.
 
 ----
-
-#### Prerequisites
-
-You must have GMP (5.0.0+ or MPIR 2.6.0+) and MPFR (3.0.0+) libraries installed in the system.
-
-##### Debian-based
-```sudo apt-get install libgmp-dev libmpfr-dev libmpfr4 gcc g++ automake autoconf```.
-
-##### RHEL-based
-```sudo yum install gcc gcc-c++ automake autoconf```.
-GMP and MPFR versions in the repo are outdated so you should just compile them from sources. Look for download links below.
-
-
-##### Windows
-Use cygwin, just don't forget to set GMP and MPFR to *devel* while installing.
-
-This package should work with latest stable npm and node, but may also work with any below. 
-If you run into any problems while installing be sure to udpate npm first.
-
-#### Downloads
-* MPFR: http://www.mpfr.org/mpfr-current/#download
-* GMP: https://gmplib.org/#DOWNLOAD
-
----
-
 #### To Install
 
 ```npm install node-hcrypt```
 
-The installation may take awhile.
+----
+Dependencies
+======
+* GMP: The GNU Multiple Precision Arithmetic Library — https://gmplib.org/ (or MPIR in GMP mode; required by FLINT)
+* MPIR: The GNU Multiple Precision Integers and Rationals — http://mpir.org/ (or GMP; required by FLINT)
+* MPFR: The GNU Multiple Precision Floating-Point Reliably — http://www.mpfr.org/ (required by FLINT)
+* FLINT: Fast Library for Number Theory — http://flintlib.org/ (version 2.4.1+)
+
+Debian-based
+------
+```apt-get -yy install libflint-2.5.2 libflint-dev libgmp-dev libmpfr-dev gcc g++ make automake autoconf gyp```.
+
+RHEL-based
+------
+```yum install gcc gcc-c++ make automake autoconf mpfr-devel gmp-devel gyp```.
+
+Note:
+  * You will need `epel-release` to download `gyp`
+  * Flint must be compiled from sources
+
+Windows
+-------
+
+You can compile library under cygwin-x64 on Windows too. Just make sure you have installed all the following libs:
+* gcc-core
+* gcc-g++
+* gmp
+* mpfr
+* autoconf2.1
+* automake1.14
+* libmprf4
+* libmprf-devel
+* libgmp10
+* libgmpxx4
+* libgmp-devel
+* make
+
+Usage
+=======
+You can use the library as demonstrated in example.js.
 
 ----
 
