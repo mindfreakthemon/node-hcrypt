@@ -12,8 +12,3 @@ RUN apt-get install -y curl && \
     apt-get install -y nodejs npm && \
     npm i -g npx
 
-RUN npm i && \
-    npx node-gyp configure && \
-    npx node-gyp build
-
-RUN node example.js

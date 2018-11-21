@@ -1,0 +1,38 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+before_script:
+  - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+
+build-master:
+  image: docker:latest
+  stage: build
+  script:
+    - docker build --pull -t "$CI_REGISTRY_IMAGE" .
+    - docker push "$CI_REGISTRY_IMAGE"
+  only:
+    refs:
+      - master
+    changes:
+      - Dockerfile
+
+build:
+  image: docker:latest
+  stage: build
+  script:
+    - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" .
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
+  only:
+    changes:
+      - Dockerfile
+  except:
+    - master
+
+test:
+  image: registry.middle-of-nowhere.name/npm-packages/node-hcrypt:latest
+  stage: test
+  script:
+    - npm i
+    - npx node-gyp configure
+    - npx node-gyp build
+    - node example.js

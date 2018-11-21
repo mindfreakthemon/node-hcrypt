@@ -1,4 +1,4 @@
 [submodule "scarab"]
 	path = scarab
-	url = git@github.com:mindfreakthemon/scarab.git
+	url = https://gitlab.middle-of-nowhere.name/mindfreakthemon/scarab.git
 	branch = master
