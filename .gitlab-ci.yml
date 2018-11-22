@@ -28,7 +28,7 @@ build:
     - master
 
 test:
-  image: registry.middle-of-nowhere.name/npm-packages/node-hcrypt:latest
+  image: "$CI_REGISTRY/npm-packages/node-hcrypt:latest"
   stage: test
   script:
     - npm i
